@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&family=Public+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Noto Serif", serif;
+  
+  --color-primary: #000666;
+  --color-primary-container: #1A237E;
+  --color-secondary: #af2b3e;
+  --color-tertiary: #C5A059;
+  --color-surface: #f9f9f9;
+  --color-surface-container-low: #f3f3f3;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-high: #e8e8e8;
+  --color-on-surface: #1a1c1c;
+  --color-on-surface-variant: #454652;
+  --color-outline: #767683;
+  --color-outline-variant: #c6c5d4;
+}
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+.glass-topbar {
+  @apply bg-white/80 backdrop-blur-md;
+}
+
+.soft-gold-bar {
+  @apply border-l-2 border-tertiary;
+}
+
+.card-lift {
+  @apply bg-surface-container-lowest shadow-sm transition-all duration-200;
+}
+
+.btn-primary {
+  @apply bg-gradient-to-br from-primary to-primary-container text-white font-semibold rounded-md shadow-md shadow-primary/10 hover:opacity-95 transition-all;
+}
