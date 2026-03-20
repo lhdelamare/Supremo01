@@ -35,8 +35,8 @@ const chartData = [
 ];
 
 const stats = [
-  { label: 'Total de Irmãos', value: '1,248', icon: Users, trend: '+12%', trendUp: true, color: 'text-blue-600', bg: 'bg-blue-50' },
-  { label: 'Capítulos Ativos', value: '42', icon: Building2, trend: '+2', trendUp: true, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  { label: 'Total de Irmãos', value: '1,248', icon: Users, trend: '+12%', trendUp: true, color: 'text-primary', bg: 'bg-primary/10' },
+  { label: 'Capítulos Ativos', value: '42', icon: Building2, trend: '+2', trendUp: true, color: 'text-secondary', bg: 'bg-secondary/10' },
   { label: 'Receita Mensal', value: 'R$ 45.200', icon: DollarSign, trend: '+8.4%', trendUp: true, color: 'text-amber-600', bg: 'bg-amber-50' },
   { label: 'Vendas na Loja', value: 'R$ 12.850', icon: ShoppingBag, trend: '-2.1%', trendUp: false, color: 'text-purple-600', bg: 'bg-purple-50' },
 ];
@@ -107,8 +107,8 @@ export function Dashboard() {
                 <AreaChart data={chartData}>
                   <defs>
                     <linearGradient id="colorRec" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#000666" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#000666" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#af2b3e" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#af2b3e" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
@@ -130,7 +130,7 @@ export function Dashboard() {
                   <Area 
                     type="monotone" 
                     dataKey="receita" 
-                    stroke="#000666" 
+                    stroke="#af2b3e" 
                     fillOpacity={1} 
                     fill="url(#colorRec)" 
                     strokeWidth={2}

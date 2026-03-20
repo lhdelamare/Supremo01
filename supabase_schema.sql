@@ -56,7 +56,7 @@ CREATE TABLE financeiro (
   data_pagamento DATE,
   valor DECIMAL(12,2) NOT NULL,
   tipo_movimento TEXT NOT NULL CHECK (tipo_movimento IN ('debito', 'credito')),
-  status TEXT DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'cancelado')),
+  status TEXT DEFAULT 'pendente' CHECK (status IN ('pendente', 'pago', 'cancelado', 'lancado')),
   observacoes TEXT,
   criado_por UUID REFERENCES profiles(id),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL

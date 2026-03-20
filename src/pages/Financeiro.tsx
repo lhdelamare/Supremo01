@@ -192,6 +192,35 @@ export function FinanceiroPage() {
     }
   };
 
+  const handleCancelPayment = async (irmaoId: string) => {
+    const captacao = transacoes.find(t => 
+      t.entidade_id === irmaoId && 
+      t.categoria === 'Captação Anual' && 
+      t.descricao.includes(selectedCaptacao) &&
+      t.status === 'pago'
+    );
+
+    if (!captacao) {
+      alert('Pagamento de captação não encontrado para este irmão e ano.');
+      return;
+    }
+
+    if (window.confirm(`Deseja cancelar o pagamento da Captação ${selectedCaptacao} para este irmão?`)) {
+      try {
+        console.log('Cancelando pagamento para:', irmaoId, 'ID Transação:', captacao.id);
+        await financeiroService.update(captacao.id, { 
+          status: 'lancado',
+          data_pagamento: null as any
+        });
+        alert('Pagamento cancelado com sucesso!');
+        await loadGestaoData();
+      } catch (error: any) {
+        console.error('Erro ao cancelar pagamento:', error);
+        alert(`Erro ao cancelar pagamento: ${error.message || 'Erro desconhecido'}`);
+      }
+    }
+  };
+
   const totalCredito = transacoes
     .filter(t => t.tipo_movimento === 'credito' && t.status === 'pago')
     .reduce((acc, curr) => acc + curr.valor, 0);
@@ -209,21 +238,21 @@ export function FinanceiroPage() {
 
   const statusIcons = {
     pago: <CheckCircle2 className="mr-1 h-3 w-3 text-emerald-600" />,
-    pendente: <Clock className="mr-1 h-3 w-3 text-amber-600" />,
-    lancado: <Clock className="mr-1 h-3 w-3 text-blue-600" />,
+    pendente: <Clock className="mr-1 h-3 w-3 text-primary" />,
+    lancado: <Clock className="mr-1 h-3 w-3 text-primary" />,
     cancelado: <XCircle className="mr-1 h-3 w-3 text-red-600" />,
   };
 
   const statusClasses = {
     pago: 'bg-emerald-50 text-emerald-700',
-    pendente: 'bg-amber-50 text-amber-700',
-    lancado: 'bg-blue-50 text-blue-700',
+    pendente: 'bg-primary/10 text-primary',
+    lancado: 'bg-primary/10 text-primary',
     cancelado: 'bg-red-50 text-red-700',
   };
 
   const statusLabels = {
     pago: 'Pago',
-    pendente: 'Pendente',
+    pendente: 'Lançado',
     lancado: 'Lançado',
     cancelado: 'Cancelado'
   };
@@ -611,10 +640,19 @@ export function FinanceiroPage() {
                                     Registrar Pagamento
                                   </Button>
                                 ) : captacao && captacao.status === 'pago' ? (
-                                  <span className="text-emerald-600 flex items-center justify-end text-xs font-medium">
-                                    <CheckCircle2 className="mr-1 h-3 w-3" />
-                                    Pago
-                                  </span>
+                                  <div className="flex flex-col items-end space-y-1">
+                                    <span className="text-emerald-600 flex items-center justify-end text-xs font-medium">
+                                      <CheckCircle2 className="mr-1 h-3 w-3" />
+                                      Pago
+                                    </span>
+                                    <button 
+                                      onClick={() => handleCancelPayment(irmao.id)}
+                                      className="text-[10px] text-red-600 hover:underline flex items-center"
+                                    >
+                                      <XCircle className="mr-1 h-2 w-2" />
+                                      Cancelar Pagamento
+                                    </button>
+                                  </div>
                                 ) : (
                                   <Button 
                                     size="sm" 

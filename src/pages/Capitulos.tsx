@@ -645,9 +645,9 @@ export function Capitulos() {
                         <span className={cn(
                           'inline-flex items-center rounded-full px-2 py-0.5 text-[8px] font-bold uppercase',
                           h.status === 'pago' ? 'bg-emerald-100 text-emerald-700' : 
-                          h.status === 'pendente' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                          (h.status === 'pendente' || h.status === 'lancado') ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
                         )}>
-                          {h.status}
+                          {h.status === 'pago' ? 'Pago' : (h.status === 'pendente' || h.status === 'lancado') ? 'Aberto' : 'Cancelado'}
                         </span>
                       </div>
                     </div>

@@ -86,7 +86,7 @@ export function CarteirinhaModal({ irmao, onClose }: CarteirinhaModalProps) {
                 
                 <div className="flex-1 space-y-1">
                   <p className="text-[12px] font-bold leading-tight uppercase">{irmao.nome_completo}</p>
-                  <p className="text-[9px] font-medium text-tertiary">{irmao.cargo}</p>
+                  <p className="text-[9px] font-medium text-secondary">{irmao.cargo}</p>
                   
                   <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
                     <div>

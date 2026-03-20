@@ -169,7 +169,7 @@ export function Irmaos() {
   const captacaoStatusColors = {
     pago: 'text-emerald-600',
     pendente: 'text-amber-600',
-    lancado: 'text-blue-600',
+    lancado: 'text-amber-600',
     cancelado: 'text-red-600',
   };
 
@@ -304,7 +304,7 @@ export function Irmaos() {
                               <div className="flex items-center pt-1">
                                 <CreditCard className={cn("mr-2 h-3 w-3 shrink-0", captacaoStatusColors[captacao.status as keyof typeof captacaoStatusColors])} />
                                 <span className={cn("text-[10px] font-bold uppercase", captacaoStatusColors[captacao.status as keyof typeof captacaoStatusColors])}>
-                                  Captação {currentYear}: {captacao.status === 'lancado' ? 'Lançado' : captacao.status.charAt(0).toUpperCase() + captacao.status.slice(1)}
+                                  Captação {currentYear}: {captacao.status === 'pago' ? 'Pago' : 'Aberto'}
                                 </span>
                               </div>
                             );
