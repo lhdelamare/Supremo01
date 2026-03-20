@@ -29,7 +29,11 @@ export function Usuarios() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  
+  // Edit user state
   const [editRole, setEditRole] = useState<UserRole>('consulta');
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
   
   // New user state
   const [newEmail, setNewEmail] = useState('');
@@ -66,21 +70,44 @@ export function Usuarios() {
     }
   }
 
-  const handleUpdateRole = async (userId: string) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: editRole })
-        .eq('id', userId);
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
 
-      if (error) throw error;
-      
-      setUsuarios(usuarios.map(u => u.id === userId ? { ...u, role: editRole } : u));
+    setIsSubmitting(true);
+    try {
+      // 1. Update Profile in public.profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          display_name: editDisplayName,
+          role: editRole,
+          email: editEmail
+        })
+        .eq('id', selectedUser.id);
+
+      if (profileError) throw profileError;
+
+      // 2. Update Auth User if email changed (requires service role)
+      if (editEmail !== selectedUser.email) {
+        const { error: authError } = await adminClient.auth.admin.updateUserById(
+          selectedUser.id,
+          { email: editEmail }
+        );
+        if (authError) {
+          console.warn('Erro ao atualizar email no Auth (pode exigir service role):', authError);
+        }
+      }
+
+      alert('Usuário atualizado com sucesso!');
+      loadUsuarios();
       setIsEditing(false);
       setSelectedUser(null);
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      alert('Erro ao atualizar cargo do usuário.');
+    } catch (error: any) {
+      console.error('Erro ao atualizar usuário:', error);
+      alert(`Erro ao atualizar usuário: ${error.message || 'Erro desconhecido'}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -255,7 +282,10 @@ export function Usuarios() {
                             onClick={() => {
                               setSelectedUser(u);
                               setEditRole(u.role);
+                              setEditDisplayName(u.display_name || '');
+                              setEditEmail(u.email || '');
                               setIsEditing(true);
+                              setIsAdding(false);
                             }}
                           >
                             <Edit2 className="h-4 w-4" />
@@ -361,52 +391,77 @@ export function Usuarios() {
             >
               <Card className="border-primary/20 bg-primary/5">
                 <CardHeader>
-                  <CardTitle className="text-lg">Editar Permissões</CardTitle>
+                  <CardTitle className="text-lg">Editar Usuário</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white font-bold text-xl">
-                      {selectedUser.display_name.charAt(0).toUpperCase()}
+                <CardContent>
+                  <form onSubmit={handleUpdateUser} className="space-y-4">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white font-bold text-xl">
+                        {selectedUser.display_name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-bold text-on-surface">{selectedUser.display_name}</p>
+                        <p className="text-xs text-on-surface-variant">{selectedUser.email}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-on-surface">{selectedUser.display_name}</p>
-                      <p className="text-xs text-on-surface-variant">{selectedUser.email}</p>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome Completo</label>
+                      <Input 
+                        required
+                        value={editDisplayName}
+                        onChange={(e) => setEditDisplayName(e.target.value)}
+                        placeholder="Ex: João Silva"
+                      />
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Cargo / Nível de Acesso</label>
-                    <select 
-                      className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm"
-                      value={editRole}
-                      onChange={(e) => setEditRole(e.target.value as UserRole)}
-                    >
-                      <option value="inativo">Inativo (Sem acesso)</option>
-                      <option value="consulta">Consulta (Apenas leitura)</option>
-                      <option value="financeiro">Financeiro (Gestão de pagamentos)</option>
-                      <option value="secretario">Secretário (Gestão de membros)</option>
-                      <option value="admin">Administrador (Acesso total)</option>
-                    </select>
-                  </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">E-mail</label>
+                      <Input 
+                        required
+                        type="email"
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                        placeholder="joao@exemplo.com"
+                      />
+                    </div>
 
-                  <div className="flex space-x-2 pt-4">
-                    <Button 
-                      className="flex-1" 
-                      onClick={() => handleUpdateRole(selectedUser.id)}
-                    >
-                      Salvar Alterações
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setSelectedUser(null);
-                      }}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Cargo / Nível de Acesso</label>
+                      <select 
+                        className="w-full rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm"
+                        value={editRole}
+                        onChange={(e) => setEditRole(e.target.value as UserRole)}
+                      >
+                        <option value="inativo">Inativo (Sem acesso)</option>
+                        <option value="consulta">Consulta (Apenas leitura)</option>
+                        <option value="financeiro">Financeiro (Gestão de pagamentos)</option>
+                        <option value="secretario">Secretário (Gestão de membros)</option>
+                        <option value="admin">Administrador (Acesso total)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex space-x-2 pt-4">
+                      <Button 
+                        type="submit"
+                        className="flex-1" 
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Salvando...' : 'Salvar Alterações'}
+                      </Button>
+                      <Button 
+                        type="button"
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => {
+                          setIsEditing(false);
+                          setSelectedUser(null);
+                        }}
+                      >
+                        Cancelar
+                      </Button>
+                    </div>
+                  </form>
                 </CardContent>
               </Card>
             </motion.div>
