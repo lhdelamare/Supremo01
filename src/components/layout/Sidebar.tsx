@@ -20,12 +20,13 @@ const menuItems = [
   { icon: Users, label: 'Irmãos', path: '/irmaos' },
   { icon: Wallet, label: 'Financeiro', path: '/financeiro' },
   { icon: ShoppingBag, label: 'Vendas & Loja', path: '/loja' },
+  { icon: Users, label: 'Usuários', path: '/usuarios', roles: ['admin'] },
   { icon: ShieldCheck, label: 'Administração', path: '/admin', roles: ['admin'] },
   { icon: Settings, label: 'Configurações', path: '/configuracoes' },
 ];
 
 export function Sidebar() {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -36,6 +37,12 @@ export function Sidebar() {
       console.error('Logout error:', error);
     }
   };
+
+  const filteredMenuItems = menuItems.filter(item => {
+    if (!item.roles) return true;
+    if (user?.email === 'delamare@gmail.com') return true; // Fallback for main admin
+    return user && item.roles.includes(user.role);
+  });
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-outline-variant bg-surface-container-lowest transition-transform">
@@ -51,7 +58,7 @@ export function Sidebar() {
         </div>
 
         <nav className="flex-1 space-y-1">
-          {menuItems.map((item) => (
+          {filteredMenuItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}

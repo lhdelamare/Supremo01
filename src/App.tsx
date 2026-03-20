@@ -7,6 +7,7 @@ import { Irmaos } from './pages/Irmaos';
 import { FinanceiroPage } from './pages/Financeiro';
 import { Loja } from './pages/Loja';
 import { Login } from './pages/Login';
+import { Usuarios } from './pages/Usuarios';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 function AppRoutes() {
@@ -34,6 +35,7 @@ function AppRoutes() {
         <Route path="irmaos" element={<Irmaos />} />
         <Route path="financeiro" element={<FinanceiroPage />} />
         <Route path="loja" element={<Loja />} />
+        <Route path="usuarios" element={<Usuarios />} />
         <Route path="admin" element={<div className="p-4">Módulo Administrativo em breve...</div>} />
         <Route path="configuracoes" element={<div className="p-4">Configurações em breve...</div>} />
       </Route>

@@ -72,15 +72,22 @@ export function Login() {
         <Card className="border-none shadow-2xl shadow-primary/5">
           <CardHeader className="space-y-1 pb-2">
             <CardTitle className="text-xl">Acesso ao Sistema</CardTitle>
-            <CardDescription>Entre com suas credenciais para continuar</CardDescription>
+            <CardDescription>
+              Entre com suas credenciais para continuar
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               {error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 border border-red-100 whitespace-pre-wrap">
+                <div className={`rounded-md p-3 text-sm border whitespace-pre-wrap ${
+                  error.includes('sucesso') 
+                    ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
+                    : 'bg-red-50 text-red-600 border-red-100'
+                }`}>
                   {error}
                 </div>
               )}
+              
               <div className="space-y-2">
                 <label className="text-sm font-medium text-on-surface">E-mail</label>
                 <div className="relative">
