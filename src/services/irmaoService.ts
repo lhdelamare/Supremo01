@@ -61,5 +61,26 @@ export const irmaoService = {
       .eq('id', id);
 
     if (error) throw error;
+  },
+
+  async uploadFoto(file: File): Promise<string> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
+    const filePath = `fotos/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('irmaos_fotos')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Erro no upload:', uploadError);
+      throw new Error('Falha ao fazer upload da imagem. Certifique-se de que o bucket "irmaos_fotos" existe no Supabase.');
+    }
+
+    const { data } = supabase.storage
+      .from('irmaos_fotos')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
   }
 };

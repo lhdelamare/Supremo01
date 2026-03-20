@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, 
   Search, 
@@ -34,9 +34,12 @@ export function Irmaos() {
   const [captacoes, setCaptacoes] = useState<Financeiro[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCapitulo, setSelectedCapitulo] = useState<string>('all');
   const [selectedIrmaoForCard, setSelectedIrmaoForCard] = useState<Irmao | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIrmao, setEditingIrmao] = useState<Irmao | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState<Partial<Irmao>>({
     nome_completo: '',
     cpf: '',
@@ -113,6 +116,34 @@ export function Irmaos() {
     }));
   };
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor, selecione uma imagem válida.');
+      return;
+    }
+
+    // Validar tamanho (ex: 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert('A imagem deve ter no máximo 2MB.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const publicUrl = await irmaoService.uploadFoto(file);
+      setFormData(prev => ({ ...prev, foto_url: publicUrl }));
+    } catch (error: any) {
+      console.error('Erro no upload:', error);
+      alert(error.message || 'Erro ao fazer upload da foto.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -153,11 +184,15 @@ export function Irmaos() {
     return capitulos.find(c => c.id === id)?.nome || 'Não vinculado';
   };
 
-  const filteredIrmaos = irmaos.filter(i => 
-    i.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    i.cpf.includes(searchTerm) ||
-    i.numero_registro.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredIrmaos = irmaos.filter(i => {
+    const matchesSearch = i.nome_completo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      i.cpf.includes(searchTerm) ||
+      i.numero_registro.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCapitulo = selectedCapitulo === 'all' || i.capitulo_id === selectedCapitulo;
+    
+    return matchesSearch && matchesCapitulo;
+  });
 
   const statusColors = {
     ativo: 'bg-emerald-50 text-emerald-700',
@@ -197,129 +232,127 @@ export function Irmaos() {
       <Card>
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
-              <Input 
-                placeholder="Buscar por nome, CPF ou registro..." 
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex flex-1 flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
+                <Input 
+                  placeholder="Buscar por nome, CPF ou registro..." 
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Filter className="h-4 w-4 text-on-surface-variant" />
+                <select
+                  value={selectedCapitulo}
+                  onChange={(e) => setSelectedCapitulo(e.target.value)}
+                  className="rounded-md border border-outline-variant bg-surface px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
+                >
+                  <option value="all">Todos os Capítulos</option>
+                  {capitulos.map(c => (
+                    <option key={c.id} value={c.id}>{c.nome} (Nº {c.numero})</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <Button variant="ghost" size="sm" className="w-full sm:w-auto">
-              <Filter className="mr-2 h-4 w-4" />
-              Filtros
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {loading ? (
-              <div className="col-span-full py-10 text-center text-on-surface-variant">
-                Carregando irmãos...
-              </div>
-            ) : filteredIrmaos.length === 0 ? (
-              <div className="col-span-full py-10 text-center text-on-surface-variant">
-                Nenhum irmão encontrado.
-              </div>
-            ) : (
-              filteredIrmaos.map((irmao, index) => (
-                <motion.div
-                  key={irmao.id}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Card className="card-lift overflow-hidden">
-                    <div className="flex p-5">
-                      <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-outline-variant bg-surface-container-low">
-                        {irmao.foto_url ? (
-                          <img src={irmao.foto_url} alt={irmao.nome_completo} className="h-full w-full object-cover" />
-                        ) : (
-                          <UserIcon className="h-full w-full p-4 text-outline" />
-                        )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-outline-variant text-xs uppercase tracking-wider text-on-surface-variant">
+                <tr>
+                  <th className="px-4 py-3 font-bold">Irmão</th>
+                  <th className="px-4 py-3 font-bold">Capítulo</th>
+                  <th className="px-4 py-3 font-bold">Admissão</th>
+                  <th className="px-4 py-3 font-bold">Status</th>
+                  <th className="px-4 py-3 text-right font-bold">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant">
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-on-surface-variant">
+                      Carregando irmãos...
+                    </td>
+                  </tr>
+                ) : filteredIrmaos.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-10 text-center text-on-surface-variant">
+                      Nenhum irmão encontrado.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredIrmaos.map((irmao) => (
+                    <tr 
+                      key={irmao.id} 
+                      className="group cursor-pointer transition-colors hover:bg-surface-container-low"
+                      onClick={() => handleOpenModal(irmao)}
+                    >
+                      <td className="px-4 py-4">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-outline-variant bg-surface-container-low">
+                            {irmao.foto_url ? (
+                              <img src={irmao.foto_url} alt={irmao.nome_completo} className="h-full w-full object-cover" />
+                            ) : (
+                              <UserIcon className="h-full w-full p-2 text-outline" />
+                            )}
+                          </div>
+                          <div className="ml-3">
+                            <p className="font-bold text-on-surface">{irmao.nome_completo}</p>
+                            <p className="text-xs text-on-surface-variant">{irmao.numero_registro}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center text-on-surface-variant">
+                          <Building2 className="mr-2 h-4 w-4 shrink-0" />
+                          <span>{getCapituloNome(irmao.capitulo_id)}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-on-surface-variant">
+                        {new Date(irmao.data_admissao).toLocaleDateString('pt-BR')}
+                      </td>
+                      <td className="px-4 py-4">
                         <span className={cn(
-                          'absolute bottom-0 left-0 right-0 py-0.5 text-center text-[10px] font-bold uppercase',
+                          'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold uppercase',
                           statusColors[irmao.status as keyof typeof statusColors]
                         )}>
                           {irmao.status}
                         </span>
-                      </div>
-                      
-                      <div className="ml-4 flex-1 space-y-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-serif font-bold text-on-surface leading-tight">{irmao.nome_completo}</h3>
-                            <p className="text-xs font-medium text-primary">{irmao.numero_registro}</p>
-                          </div>
-                          <div className="flex space-x-1">
-                            <button 
-                              onClick={() => setSelectedIrmaoForCard(irmao)}
-                              title="Carteirinha"
-                              className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-container-high transition-colors"
-                            >
-                              <IdCard className="h-4 w-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleOpenModal(irmao)}
-                              title="Editar"
-                              className="rounded-md p-1.5 text-on-surface-variant hover:bg-surface-container-high transition-colors"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(irmao.id)}
-                              title="Excluir"
-                              className="rounded-md p-1.5 text-on-surface-variant hover:bg-red-50 hover:text-red-600 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
+                          <button 
+                            onClick={() => setSelectedIrmaoForCard(irmao)}
+                            title="Carteirinha"
+                            className="rounded-md p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                          >
+                            <IdCard className="h-4 w-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleOpenModal(irmao)}
+                            title="Editar"
+                            className="rounded-md p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(irmao.id)}
+                            title="Excluir"
+                            className="rounded-md p-2 text-on-surface-variant hover:bg-red-50 hover:text-red-600 transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
-                        
-                        <div className="space-y-1 pt-2">
-                          <div className="flex items-center text-xs text-on-surface-variant">
-                            <Building2 className="mr-2 h-3 w-3 shrink-0" />
-                            <span className="truncate">{getCapituloNome(irmao.capitulo_id)}</span>
-                          </div>
-                          <div className="flex items-center text-xs text-on-surface-variant">
-                            <Mail className="mr-2 h-3 w-3 shrink-0" />
-                            <span className="truncate">{irmao.email}</span>
-                          </div>
-                          <div className="flex items-center text-xs text-on-surface-variant">
-                            <Phone className="mr-2 h-3 w-3 shrink-0" />
-                            <span>{irmao.telefone}</span>
-                          </div>
-                          
-                          {/* Status da Captação */}
-                          {(() => {
-                            const captacao = captacoes.find(c => 
-                              c.entidade_id === irmao.id && 
-                              c.descricao.includes(currentYear)
-                            );
-                            
-                            if (!captacao) return null;
-                            
-                            return (
-                              <div className="flex items-center pt-1">
-                                <CreditCard className={cn("mr-2 h-3 w-3 shrink-0", captacaoStatusColors[captacao.status as keyof typeof captacaoStatusColors])} />
-                                <span className={cn("text-[10px] font-bold uppercase", captacaoStatusColors[captacao.status as keyof typeof captacaoStatusColors])}>
-                                  Captação {currentYear}: {captacao.status === 'pago' ? 'Pago' : 'Aberto'}
-                                </span>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="bg-surface-container-low px-5 py-2 flex items-center justify-between">
-                      <p className="text-[10px] uppercase tracking-wider text-outline">Admissão: {new Date(irmao.data_admissao).toLocaleDateString('pt-BR')}</p>
-                      <p className="text-xs font-semibold text-on-surface-variant">{irmao.cargo}</p>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))
-            )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </CardContent>
       </Card>
@@ -332,22 +365,56 @@ export function Irmaos() {
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
-            <div className="relative h-32 w-32 overflow-hidden rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex items-center justify-center">
-              {formData.foto_url ? (
-                <img src={formData.foto_url} alt="Preview" className="h-full w-full object-cover" />
+            <div 
+              className="group relative h-32 w-32 cursor-pointer overflow-hidden rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex items-center justify-center transition-colors hover:border-primary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {isUploading ? (
+                <div className="flex flex-col items-center space-y-2">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  <span className="text-[10px] font-medium text-on-surface-variant">Subindo...</span>
+                </div>
+              ) : formData.foto_url ? (
+                <>
+                  <img src={formData.foto_url} alt="Preview" className="h-full w-full object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                    <Camera className="h-8 w-8 text-white" />
+                  </div>
+                </>
               ) : (
-                <Camera className="h-8 w-8 text-outline" />
+                <div className="flex flex-col items-center space-y-2">
+                  <Camera className="h-8 w-8 text-outline" />
+                  <span className="text-[10px] font-medium text-on-surface-variant">Clique para subir</span>
+                </div>
               )}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*"
+                onChange={handleFileChange}
+              />
             </div>
             <div className="flex-1 space-y-2">
-              <label className="text-sm font-medium">URL da Foto</label>
-              <Input 
-                name="foto_url" 
-                value={formData.foto_url} 
-                onChange={handleInputChange} 
-                placeholder="https://exemplo.com/foto.jpg"
-              />
-              <p className="text-[10px] text-on-surface-variant">Insira uma URL de imagem válida para o perfil.</p>
+              <label className="text-sm font-medium">Foto do Perfil</label>
+              <div className="flex space-x-2">
+                <Input 
+                  name="foto_url" 
+                  value={formData.foto_url} 
+                  onChange={handleInputChange} 
+                  placeholder="URL da imagem ou suba um arquivo"
+                />
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                >
+                  Subir Foto
+                </Button>
+              </div>
+              <p className="text-[10px] text-on-surface-variant">Clique no quadro ou no botão para selecionar uma imagem do seu computador.</p>
             </div>
           </div>
 
