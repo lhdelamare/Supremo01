@@ -25,8 +25,25 @@ export function Login() {
       await signIn(email, password);
       navigate('/');
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'Erro ao entrar. Verifique suas credenciais.');
+      console.error('Login error details:', err);
+      
+      // Detailed error formatting for debugging
+      let detailedError = err.message || 'Erro ao entrar.';
+      
+      if (err.name) detailedError += ` (${err.name})`;
+      if (err.status) detailedError += ` [Status: ${err.status}]`;
+      
+      // Check for common "Failed to fetch" causes
+      if (detailedError.includes('Failed to fetch') || detailedError.includes('NetworkError')) {
+        detailedError += '\n\nPossíveis causas:\n1. Bloqueador de anúncios (AdBlock) ativo.\n2. Variáveis VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY ausentes no Vercel.\n3. Domínio do Vercel não autorizado no Supabase (Authentication > URL Configuration).';
+        
+        // Add environment variable status (safe check)
+        const hasUrl = !!import.meta.env.VITE_SUPABASE_URL;
+        const hasKey = !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+        detailedError += `\n\nStatus Env: URL=${hasUrl ? 'OK' : 'MISSING'}, KEY=${hasKey ? 'OK' : 'MISSING'}`;
+      }
+
+      setError(detailedError);
     } finally {
       setLoading(false);
     }
@@ -60,7 +77,7 @@ export function Login() {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               {error && (
-                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 border border-red-100">
+                <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 border border-red-100 whitespace-pre-wrap">
                   {error}
                 </div>
               )}
