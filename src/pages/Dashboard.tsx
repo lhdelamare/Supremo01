@@ -51,17 +51,17 @@ const recentActivities = [
 export function Dashboard() {
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-primary">Painel de Controle</h1>
           <p className="text-on-surface-variant">Bem-vindo ao sistema administrativo do SGCARSP.</p>
         </div>
-        <div className="flex space-x-3">
-          <button className="flex items-center rounded-md bg-white px-4 py-2 text-sm font-medium text-on-surface shadow-sm border border-outline-variant hover:bg-surface-container-low transition-colors">
+        <div className="flex flex-wrap gap-2 md:space-x-3">
+          <button className="flex flex-1 md:flex-none items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-on-surface shadow-sm border border-outline-variant hover:bg-surface-container-low transition-colors">
             <Clock className="mr-2 h-4 w-4" />
             Relatório Rápido
           </button>
-          <button className="btn-primary px-4 py-2 text-sm">
+          <button className="btn-primary flex-1 md:flex-none px-4 py-2 text-sm">
             Novo Lançamento
           </button>
         </div>

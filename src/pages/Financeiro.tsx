@@ -259,21 +259,21 @@ export function FinanceiroPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-serif font-bold text-primary">Financeiro</h1>
           <p className="text-on-surface-variant">Controle de receitas, despesas e anuidades.</p>
         </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" onClick={() => setIsCaptacaoModalOpen(true)}>
+        <div className="flex flex-wrap gap-2 md:space-x-3">
+          <Button variant="outline" onClick={() => setIsCaptacaoModalOpen(true)} className="flex-1 md:flex-none">
             <Calendar className="mr-2 h-4 w-4" />
             Lançar Captação Anual
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="flex-1 md:flex-none">
             <Download className="mr-2 h-4 w-4" />
             Relatórios
           </Button>
-          <Button>
+          <Button className="flex-1 md:flex-none">
             <Plus className="mr-2 h-4 w-4" />
             Novo Lançamento
           </Button>
@@ -422,8 +422,8 @@ export function FinanceiroPage() {
 
             <Card>
               <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div className="relative w-72">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="relative w-full sm:w-72">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
                     <Input 
                       placeholder="Buscar transação..." 
@@ -432,12 +432,12 @@ export function FinanceiroPage() {
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
                       <Calendar className="mr-2 h-4 w-4" />
                       Este Mês
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" className="flex-1 sm:flex-none">
                       <Filter className="mr-2 h-4 w-4" />
                       Filtros
                     </Button>
@@ -532,14 +532,14 @@ export function FinanceiroPage() {
           >
             <Card>
               <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="space-y-1">
+                    <div className="space-y-1 w-full sm:w-auto">
                       <label className="text-xs font-medium text-on-surface-variant uppercase tracking-wider">Selecionar Captação</label>
                       <select
                         value={selectedCaptacao}
                         onChange={(e) => setSelectedCaptacao(e.target.value)}
-                        className="block w-48 rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none"
+                        className="block w-full sm:w-48 rounded-md border border-outline-variant bg-surface px-3 py-2 text-sm focus:border-primary focus:outline-none"
                       >
                         <option value="">Selecione o ano</option>
                         {Array.from(new Set(captacaoHistory.map(h => {

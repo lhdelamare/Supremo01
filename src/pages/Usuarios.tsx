@@ -191,12 +191,12 @@ export function Usuarios() {
         {/* User List */}
         <Card className="lg:col-span-2">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <CardTitle>Usuários Cadastrados</CardTitle>
                 <p className="text-xs text-on-surface-variant mt-1">Total: {usuarios.length} usuários encontrados</p>
               </div>
-              <div className="relative w-64">
+              <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-outline" />
                 <Input 
                   placeholder="Buscar usuário..." 

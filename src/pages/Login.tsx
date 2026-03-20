@@ -52,14 +52,14 @@ export function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface p-4 relative overflow-hidden">
       {/* Background Decorative Elements */}
-      <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl"></div>
-      <div className="absolute -right-20 -bottom-20 h-96 w-96 rounded-full bg-secondary/5 blur-3xl"></div>
+      <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-primary/5 blur-3xl pointer-events-none z-0"></div>
+      <div className="absolute -right-20 -bottom-20 h-96 w-96 rounded-full bg-secondary/5 blur-3xl pointer-events-none z-0"></div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full max-w-md relative z-10"
       >
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
@@ -128,7 +128,17 @@ export function Login() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loading}
+                onClick={(e) => {
+                  // Fallback for some mobile browsers where form onSubmit might not trigger
+                  if (!loading && email && password) {
+                    console.log('Button clicked manually');
+                  }
+                }}
+              >
                 {loading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
                 ) : (

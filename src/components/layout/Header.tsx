@@ -1,15 +1,26 @@
 import React from 'react';
-import { Bell, Search, User as UserIcon } from 'lucide-react';
+import { Bell, Search, User as UserIcon, Menu } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
 import { useAuth } from '@/contexts/AuthContext';
 
-export function Header() {
+interface HeaderProps {
+  onMenuClick: () => void;
+}
+
+export function Header({ onMenuClick }: HeaderProps) {
   const { user } = useAuth();
 
   return (
-    <header className="glass-topbar sticky top-0 z-30 flex h-16 w-full items-center border-b border-outline-variant px-8">
+    <header className="glass-topbar sticky top-0 z-30 flex h-16 w-full items-center border-b border-outline-variant px-4 lg:px-8">
       <div className="flex flex-1 items-center">
-        <div className="relative w-96">
+        <button 
+          onClick={onMenuClick}
+          className="mr-4 rounded-full p-2 text-on-surface-variant hover:bg-surface-container-low lg:hidden"
+        >
+          <Menu className="h-6 w-6" />
+        </button>
+
+        <div className="relative hidden w-96 md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
           <Input 
             placeholder="Pesquisar no sistema..." 

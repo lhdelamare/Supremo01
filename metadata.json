@@ -1,7 +1,5 @@
 {
   "name": "SGCARSP - Sistema de Gestão Administrativa",
   "description": "Sistema completo para gestão de capítulos, irmãos, financeiro e vendas do Supremo Grande Capítulo do Arco Real de São Paulo.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "requestFramePermissions": []
 }
