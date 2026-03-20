@@ -27,6 +27,7 @@ import { Irmao, Capitulo, Financeiro } from '@/types';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { CarteirinhaModal } from '@/components/irmaos/CarteirinhaModal';
+import { ImageCropperModal } from '@/components/irmaos/ImageCropperModal';
 
 export function Irmaos() {
   const [irmaos, setIrmaos] = useState<Irmao[]>([]);
@@ -40,6 +41,8 @@ export function Irmaos() {
   const [editingIrmao, setEditingIrmao] = useState<Irmao | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Irmao>>({
     nome_completo: '',
     cpf: '',
@@ -126,14 +129,22 @@ export function Irmaos() {
       return;
     }
 
-    // Validar tamanho (ex: 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      alert('A imagem deve ter no máximo 2MB.');
-      return;
-    }
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      setTempImageSrc(reader.result as string);
+      setIsCropperOpen(true);
+    });
+    reader.readAsDataURL(file);
+    
+    // Reset input value to allow selecting same file again
+    e.target.value = '';
+  };
 
+  const handleCropComplete = async (croppedBlob: Blob) => {
     setIsUploading(true);
     try {
+      // Converter Blob para File para o upload
+      const file = new File([croppedBlob], 'foto_perfil.jpg', { type: 'image/jpeg' });
       const publicUrl = await irmaoService.uploadFoto(file);
       setFormData(prev => ({ ...prev, foto_url: publicUrl }));
     } catch (error: any) {
@@ -141,6 +152,7 @@ export function Irmaos() {
       alert(error.message || 'Erro ao fazer upload da foto.');
     } finally {
       setIsUploading(false);
+      setTempImageSrc(null);
     }
   };
 
@@ -563,6 +575,19 @@ export function Irmaos() {
         <CarteirinhaModal 
           irmao={selectedIrmaoForCard} 
           onClose={() => setSelectedIrmaoForCard(null)} 
+        />
+      )}
+
+      {tempImageSrc && (
+        <ImageCropperModal
+          isOpen={isCropperOpen}
+          imageSrc={tempImageSrc}
+          onClose={() => {
+            setIsCropperOpen(false);
+            setTempImageSrc(null);
+          }}
+          onCropComplete={handleCropComplete}
+          aspectRatio={1} // Quadrado para perfil
         />
       )}
     </div>
