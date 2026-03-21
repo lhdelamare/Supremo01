@@ -62,11 +62,18 @@ export function Login() {
         className="w-full max-w-md relative z-10"
       >
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-white shadow-lg shadow-primary/20">
-            <Shield className="h-10 w-10" />
+          <div className="mx-auto mb-4 flex h-32 w-32 items-center justify-center rounded-2xl bg-white p-2 shadow-lg shadow-primary/10">
+            <img 
+              src="https://jnilhegxnaaheezsgytw.supabase.co/storage/v1/object/public/images/Logo.png" 
+              alt="Logo Supremo" 
+              className="h-full w-full object-contain"
+              referrerPolicy="no-referrer"
+            />
           </div>
-          <h1 className="text-3xl font-serif font-bold text-primary">SGCARSP</h1>
-          <p className="text-on-surface-variant">Sistema de Gestão Administrativa</p>
+          <h1 className="text-2xl font-serif font-bold text-primary leading-tight">
+            Supremo Grande Capitulo do<br />Arco Real de São Paulo
+          </h1>
+          <p className="text-on-surface-variant mt-2">Sistema de Gestão Administrativa</p>
         </div>
 
         <Card className="border-none shadow-2xl shadow-primary/5">

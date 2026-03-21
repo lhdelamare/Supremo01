@@ -67,12 +67,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex h-full flex-col px-3 py-4">
           <div className="mb-10 flex items-center justify-between px-2">
             <div className="flex items-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
-                <span className="text-xl font-serif font-bold">S</span>
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white p-1 shadow-sm border border-outline-variant">
+                <img 
+                  src="https://jnilhegxnaaheezsgytw.supabase.co/storage/v1/object/public/images/Logo.png" 
+                  alt="Logo Supremo" 
+                  className="h-full w-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <div className="ml-3">
-                <h1 className="text-sm font-serif font-bold leading-tight text-primary">SGCARSP</h1>
-                <p className="text-[10px] uppercase tracking-wider text-on-surface-variant">Arco Real SP</p>
+                <h1 className="text-xs font-serif font-bold leading-tight text-primary">Supremo Grande Capítulo</h1>
+                <p className="text-[10px] uppercase tracking-wider text-on-surface-variant">Arco Real de SP</p>
               </div>
             </div>
             {/* Mobile Close Button */}

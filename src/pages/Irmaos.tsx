@@ -14,7 +14,8 @@ import {
   Save,
   X,
   Camera,
-  CreditCard
+  CreditCard,
+  Ban
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -222,6 +223,28 @@ export function Irmaos() {
 
   const currentYear = new Date().getFullYear().toString();
 
+  const getValidityYear = (irmaoId: string) => {
+    const irmaoCaptacoes = captacoes.filter(c => c.entidade_id === irmaoId && c.status === 'pago');
+    if (irmaoCaptacoes.length === 0) return new Date().getFullYear().toString();
+    
+    // Pegar o ano do pagamento mais recente
+    const latestPayment = irmaoCaptacoes.reduce((latest, current) => {
+      const latestDate = new Date(latest.data_pagamento || latest.data_vencimento).getTime();
+      const currentDate = new Date(current.data_pagamento || current.data_vencimento).getTime();
+      return currentDate > latestDate ? current : latest;
+    });
+    
+    return new Date(latestPayment.data_pagamento || latestPayment.data_vencimento).getFullYear().toString();
+  };
+
+  const handleOpenCarteirinha = (irmao: Irmao) => {
+    if (irmao.status !== 'ativo') {
+      alert('A carteirinha só pode ser emitida para irmãos com status ATIVO.');
+      return;
+    }
+    setSelectedIrmaoForCard(irmao);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -338,11 +361,20 @@ export function Irmaos() {
                       <td className="px-4 py-4 text-right">
                         <div className="flex justify-end space-x-2" onClick={(e) => e.stopPropagation()}>
                           <button 
-                            onClick={() => setSelectedIrmaoForCard(irmao)}
-                            title="Carteirinha"
-                            className="rounded-md p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors"
+                            onClick={() => handleOpenCarteirinha(irmao)}
+                            title={irmao.status === 'ativo' ? "Carteirinha" : "Emissão não permitida (Membro não ativo)"}
+                            className={cn(
+                              "rounded-md p-2 transition-colors",
+                              irmao.status === 'ativo' 
+                                ? "text-on-surface-variant hover:bg-surface-container-high" 
+                                : "text-red-400 cursor-not-allowed"
+                            )}
                           >
-                            <IdCard className="h-4 w-4" />
+                            {irmao.status === 'ativo' ? (
+                              <IdCard className="h-4 w-4" />
+                            ) : (
+                              <Ban className="h-4 w-4" />
+                            )}
                           </button>
                           <button 
                             onClick={() => handleOpenModal(irmao)}
@@ -574,6 +606,7 @@ export function Irmaos() {
       {selectedIrmaoForCard && (
         <CarteirinhaModal 
           irmao={selectedIrmaoForCard} 
+          validityYear={getValidityYear(selectedIrmaoForCard.id)}
           onClose={() => setSelectedIrmaoForCard(null)} 
         />
       )}

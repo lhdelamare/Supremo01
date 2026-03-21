@@ -8,10 +8,11 @@ import { cn } from '@/lib/utils';
 
 interface CarteirinhaModalProps {
   irmao: Irmao;
+  validityYear: string;
   onClose: () => void;
 }
 
-export function CarteirinhaModal({ irmao, onClose }: CarteirinhaModalProps) {
+export function CarteirinhaModal({ irmao, validityYear, onClose }: CarteirinhaModalProps) {
   const cardRef = useRef<HTMLDivElement>(null);
 
   const handleDownload = async () => {
@@ -48,8 +49,12 @@ export function CarteirinhaModal({ irmao, onClose }: CarteirinhaModalProps) {
           {/* Visual Preview of the Card */}
           <div 
             ref={cardRef}
-            className="relative h-[204px] w-[323px] overflow-hidden rounded-[12px] bg-gradient-to-br from-primary to-primary-container text-white shadow-xl"
-            style={{ width: '85.6mm', height: '54mm' }}
+            className="relative h-[204px] w-[323px] overflow-hidden rounded-[12px] text-white shadow-xl"
+            style={{ 
+              width: '85.6mm', 
+              height: '54mm',
+              background: 'linear-gradient(to bottom right, #af2b3e, #8e2332)'
+            }}
           >
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">
@@ -57,68 +62,68 @@ export function CarteirinhaModal({ irmao, onClose }: CarteirinhaModalProps) {
               <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full border-[30px] border-white"></div>
             </div>
 
-            <div className="relative flex h-full flex-col p-4">
-              <div className="flex items-center justify-between border-b border-white/20 pb-2">
+            <div className="relative flex h-full flex-col pt-3 px-4 pb-6">
+              {/* Header */}
+              <div className="flex items-center justify-between border-b pb-2" style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}>
                 <div className="flex items-center">
-                  <div className="h-8 w-8 rounded bg-white p-1">
-                    <span className="text-primary font-bold text-lg">S</span>
+                  <div className="h-10 w-10 rounded bg-white p-1">
+                    <img 
+                      src="https://jnilhegxnaaheezsgytw.supabase.co/storage/v1/object/public/images/Logo.png" 
+                      alt="Logo Supremo" 
+                      className="h-full w-full object-contain"
+                      crossOrigin="anonymous"
+                    />
                   </div>
                   <div className="ml-2">
                     <p className="text-[8px] font-bold uppercase leading-tight">Supremo Grande Capítulo</p>
-                    <p className="text-[10px] font-serif font-bold leading-tight">Arco Real de São Paulo</p>
+                    <p className="text-[11px] font-serif font-bold leading-tight">Arco Real de São Paulo</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[8px] uppercase tracking-widest text-white/70">Membro Ativo</p>
+                  <p className="text-[8px] uppercase tracking-widest" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>Membro Ativo</p>
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-1 space-x-4">
-                <div className="h-20 w-16 shrink-0 overflow-hidden rounded border border-white/30 bg-white/10">
+              {/* Middle Content */}
+              <div className="mt-1 flex flex-1 space-x-4">
+                <div className="mt-1 h-20 w-16 shrink-0 overflow-hidden rounded border" style={{ borderColor: 'rgba(255, 255, 255, 0.3)', backgroundColor: 'rgba(255, 255, 255, 0.1)' }}>
                   {irmao.foto_url ? (
                     <img src={irmao.foto_url} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-white/30">
+                    <div className="flex h-full w-full items-center justify-center" style={{ color: 'rgba(255, 255, 255, 0.3)' }}>
                       <span className="text-2xl font-bold">?</span>
                     </div>
                   )}
                 </div>
                 
-                <div className="flex-1 space-y-1">
-                  <p className="text-[12px] font-bold leading-tight uppercase">{irmao.nome_completo}</p>
+                <div className="flex-1 space-y-0.5">
+                  <p className="text-[13px] font-bold leading-tight uppercase">{irmao.nome_completo}</p>
                   <p className="text-[9px] font-medium text-secondary">{irmao.cargo}</p>
                   
-                  <div className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1">
+                  <div className="mt-1 grid grid-cols-2 gap-x-3 gap-y-1.5">
                     <div>
-                      <p className="text-[6px] uppercase text-white/60">Registro</p>
-                      <p className="text-[8px] font-bold">{irmao.numero_registro}</p>
+                      <p className="text-[6px] uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Registro</p>
+                      <p className="text-[9px] font-bold">{irmao.numero_registro}</p>
                     </div>
                     <div>
-                      <p className="text-[6px] uppercase text-white/60">CPF</p>
-                      <p className="text-[8px] font-bold">{irmao.cpf}</p>
+                      <p className="text-[6px] uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>CPF</p>
+                      <p className="text-[9px] font-bold">{irmao.cpf}</p>
                     </div>
                     <div>
-                      <p className="text-[6px] uppercase text-white/60">Admissão</p>
-                      <p className="text-[8px] font-bold">{new Date(irmao.data_admissao).toLocaleDateString('pt-BR')}</p>
+                      <p className="text-[6px] uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Admissão</p>
+                      <p className="text-[9px] font-bold">{new Date(irmao.data_admissao).toLocaleDateString('pt-BR')}</p>
                     </div>
                     <div>
-                      <p className="text-[6px] uppercase text-white/60">Validade</p>
-                      <p className="text-[8px] font-bold">31/12/2025</p>
+                      <p className="text-[6px] uppercase tracking-wider" style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Validade</p>
+                      <p className="text-[9px] font-bold">31/12/{validityYear}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-auto flex items-center justify-between border-t border-white/20 pt-2">
-                <p className="text-[6px] text-white/50 italic">Este documento é de uso pessoal e intransferível.</p>
-                <div className="h-6 w-6 bg-white rounded p-0.5">
-                  {/* Mock QR Code */}
-                  <div className="grid grid-cols-3 grid-rows-3 gap-0.5 h-full w-full">
-                    {[...Array(9)].map((_, i) => (
-                      <div key={i} className={cn("bg-black", Math.random() > 0.5 ? "opacity-100" : "opacity-0")}></div>
-                    ))}
-                  </div>
-                </div>
+              {/* Footer */}
+              <div className="mt-auto flex items-center justify-between border-t pt-2" style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}>
+                <p className="text-[6px] italic" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Este documento é de uso pessoal e intransferível.</p>
               </div>
             </div>
           </div>
